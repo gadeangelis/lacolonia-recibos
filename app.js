@@ -224,8 +224,9 @@ function imprimirRecibo(d) {
 
     // 2. Cambiamos el título por el nombre que queremos para el PDF
     // Reemplazamos espacios por guiones bajos para que el nombre de archivo sea más limpio
-    const nombreArchivo = `Recibo_${d.Nro_Folio}_${d.Jugador.replace(/ /g, "_")}`;
-    document.title = nombreArchivo;
+    //const nombreArchivo = `Recibo_${d.Nro_Folio}_${d.Jugador.replace(/ /g, "_")}`;
+    //document.title = nombreArchivo;
+    document.title = "Recibo " + d.Nro_Folio + " - " + d.Jugador;
 
     setTimeout(() => { 
         window.print(); 
