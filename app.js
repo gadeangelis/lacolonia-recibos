@@ -91,10 +91,12 @@ db.ref('historial').on('value', snap => {
     if(mostrarHistorial) actualizarTablaHistorial();
 });
 
-// 5. GENERAR RECIBO (BOTON)
+// 5. GENERAR RECIBO (ACTUALIZADO CON DETALLES)
 document.getElementById('formCobro').onsubmit = (e) => {
     e.preventDefault();
     const hoy = new Date();
+    
+    // Creamos el objeto del recibo
     const d = {
         Nro_Folio: numeroFolio.toString().padStart(4, '0'),
         Fecha: `${hoy.getDate()}/${hoy.getMonth()+1}/${hoy.getFullYear()}`,
@@ -105,9 +107,23 @@ document.getElementById('formCobro').onsubmit = (e) => {
         Importe: document.getElementById('total').value,
         Metodo_Pago: document.getElementById('pago').value
     };
+
+    // Guardamos en Firebase
     db.ref('historial').push(d).then(() => { 
+        // 1. Imprimimos el recibo
         imprimirRecibo(d); 
-        e.target.reset(); 
+        
+        // 2. Mostramos la confirmación personalizada con Folio y Nombre
+        const mensajeExito = `Recibo N° ${d.Nro_Folio} de ${d.Jugador} guardado correctamente`;
+        
+        mostrarConfirmacion(mensajeExito, () => {
+            // Al darle "Aceptar", limpiamos el formulario
+            e.target.reset(); 
+            // Opcional: podrías volver al inicio o limpiar sugerencias aquí
+        });
+    }).catch(error => {
+        console.error("Error al guardar:", error);
+        alert("Hubo un error al guardar el recibo");
     });
 };
 
@@ -202,7 +218,22 @@ function imprimirRecibo(d) {
     llenarCamposRecibo(d);
     const area = document.getElementById('areaRecibo');
     area.style.display = 'block';
-    setTimeout(() => { window.print(); area.style.display = 'none'; }, 500);
+
+    // 1. Guardamos el título original de la pestaña
+    const tituloOriginal = document.title;
+
+    // 2. Cambiamos el título por el nombre que queremos para el PDF
+    // Reemplazamos espacios por guiones bajos para que el nombre de archivo sea más limpio
+    const nombreArchivo = `Recibo_${d.Nro_Folio}_${d.Jugador.replace(/ /g, "_")}`;
+    document.title = nombreArchivo;
+
+    setTimeout(() => { 
+        window.print(); 
+        area.style.display = 'none'; 
+        
+        // 3. Restauramos el título original después de imprimir
+        document.title = tituloOriginal;
+    }, 500);
 }
 function reimprimirUno(id) {
     const r = historial.find(h => h.id === id);
