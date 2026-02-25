@@ -1,4 +1,4 @@
-const CACHE_NAME = 'recibos-v1';
+const CACHE_NAME = 'recibos-v1.5'; // Subimos la versión
 const assets = [
   './',
   './index.html',
@@ -7,17 +7,23 @@ const assets = [
 ];
 
 self.addEventListener('install', event => {
+  self.skipWaiting(); // Obliga al nuevo SW a tomar el control
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(assets);
-    })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(assets))
   );
 });
 
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys => Promise.all(
+      keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+    ))
+  );
+});
+
+// ESTRATEGIA: Intentar internet primero, si no hay, usar caché.
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
+    fetch(event.request).catch(() => caches.match(event.request))
   );
 });

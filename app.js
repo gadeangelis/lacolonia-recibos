@@ -214,28 +214,28 @@ function llenarCamposRecibo(d) {
     document.getElementById('r-pago').innerText = d.Metodo_Pago;
     document.getElementById('r-total').innerText = d.Importe;
 }
+
 function imprimirRecibo(d) {
     llenarCamposRecibo(d);
     const area = document.getElementById('areaRecibo');
     area.style.display = 'block';
 
-    // 1. Guardamos el título original de la pestaña
+    // GUARDAMOS EL TÍTULO ORIGINAL
     const tituloOriginal = document.title;
 
-    // 2. Cambiamos el título por el nombre que queremos para el PDF
-    // Reemplazamos espacios por guiones bajos para que el nombre de archivo sea más limpio
-    //const nombreArchivo = `Recibo_${d.Nro_Folio}_${d.Jugador.replace(/ /g, "_")}`;
-    //document.title = nombreArchivo;
-    document.title = "Recibo " + d.Nro_Folio + " - " + d.Jugador;
+    // CAMBIAMOS EL TÍTULO DINÁMICAMENTE (Esto es lo que verá el PDF)
+    // Resultado: Recibo 0014 - DE ANGELIS GUADALUPE
+    document.title = `Recibo ${d.Nro_Folio} - ${d.Jugador}`;
 
     setTimeout(() => { 
         window.print(); 
         area.style.display = 'none'; 
         
-        // 3. Restauramos el título original después de imprimir
+        // RESTAURAMOS EL TÍTULO PARA QUE LA PESTAÑA NO QUEDE CON EL NOMBRE DEL SOCIO
         document.title = tituloOriginal;
     }, 500);
 }
+
 function reimprimirUno(id) {
     const r = historial.find(h => h.id === id);
     if(r) imprimirRecibo(r);
